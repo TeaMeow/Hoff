@@ -212,6 +212,8 @@ class HoffTest extends \PHPUnit_Framework_TestCase
                    ->unique(['test3', 'test4'])
                    ->create('test_table10');
                    
+        $this->assertEquals('CREATE TABLE test_table10 (test varchar(32) NOT NULL , test2 varchar(32) NOT NULL , test3 varchar(32) NOT NULL , test4 varchar(32) NOT NULL, PRIMARY KEY (`test`,`test2`), UNIQUE KEY (`test3`,`test4`)) ENGINE=INNODB', $this->hoff->lastQuery);
+                   
         $this->hoff->column('test')->varchar(32)
                    ->column('test2')->varchar(32)
                    ->column('test3')->varchar(32)
@@ -219,6 +221,8 @@ class HoffTest extends \PHPUnit_Framework_TestCase
                    ->index('ik_test', ['test', 'test2'])
                    ->unique(['test3', 'test4'])
                    ->create('test_table11');
+                   
+        $this->assertEquals('CREATE TABLE test_table11 (test varchar(32) NOT NULL , test2 varchar(32) NOT NULL , test3 varchar(32) NOT NULL , test4 varchar(32) NOT NULL, UNIQUE KEY (`test3`,`test4`), INDEX `ik_test` (`test`,`test2`)) ENGINE=INNODB', $this->hoff->lastQuery);
         
         $this->hoff->column('test')->varchar(32)
                    ->column('test2')->varchar(32)
@@ -227,6 +231,8 @@ class HoffTest extends \PHPUnit_Framework_TestCase
                    ->primary(['test', 'test2'])
                    ->index('ik_test', ['test3', 'test4'])
                    ->create('test_table12');
+        
+        $this->assertEquals('CREATE TABLE test_table12 (test varchar(32) NOT NULL , test2 varchar(32) NOT NULL , test3 varchar(32) NOT NULL , test4 varchar(32) NOT NULL, PRIMARY KEY (`test`,`test2`), INDEX `ik_test` (`test3`,`test4`)) ENGINE=INNODB', $this->hoff->lastQuery);
     }
 }
 ?>

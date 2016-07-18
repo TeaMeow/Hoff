@@ -1,19 +1,47 @@
 <?php
-
 class Hoff
 {
-    private $types = [];
-    
-    private $indexTypes = [];
-    
+    /**
+     * The MysqliDB object.
+     * 
+     * @var MysqliDb
+     */
+     
     private $db = null;
     
+    /**
+     * The columns of the table.
+     * 
+     * @var array
+     */
+     
     public $columns = [];
+    
+    /**
+     * The current table information.
+     * 
+     * @var array
+     */
+     
     public $table = [];
-    public $primarys = [];
+    
+    /**
+     * The last generated query.
+     * 
+     * @var string
+     */
     
     public $lastQuery = '';
     
+    
+    
+    
+    /**
+     * CONSTRUCT
+     * 
+     * @codeCoverageIgnore
+     */
+     
     function __construct($db)
     {
         $this->db = $db;
@@ -21,60 +49,12 @@ class Hoff
         $this->clean();
     }
     
-    function clean()
-    {
-        $this->columns = [];
-        $this->table   = ['name'        => null,
-                          'type'        => 'INNODB',
-                          'uniqueKeys'  => [],
-                          'primaryKeys' => [],
-                          'indexKeys'   => [],
-                          'comment'     => null];
-    }
     
-    function setTableType($type)
-    {
-        $this->table['type'] = $type;
-        
-        return $this;
-    }
+
  
-    
-    
-    function _create($tableName, $comment = null)
-    {
-        if($comment)
-            $this->table['comment'] = $comment;
-        
-        $this->table['name'] = $tableName;
-        
-        $query = $this->tableBuilder();
-        
-        $this->db->rawQuery($query);
-        
-        $this->lastQuery = $query;
-        
-        $this->clean();
-        
-        return $this;
-    }
-    
-    function _column($columnName)
-    {
-        $this->columns[] = ['name'          => $columnName,
-                            'type'          => null,
-                            'length'        => null,
-                            'comment'       => null,
-                            'unsigned'      => false,
-                            'primary'       => null,
-                            'unique'        => null,
-                            'index'         => null,
-                            'autoIncrement' => false,
-                            'default'       => false,
-                            'nullable'      => false,
-                            'extras'        => []];
-        return $this;
-    }
+    /**
+     * CALL
+     */
 
     function __call($method, $args)
     {
@@ -91,7 +71,12 @@ class Hoff
             case 'binary'    :
             case 'varbinary' :
             case 'bit'       :
-                /** bit(1) */
+            case 'double'    :
+            case 'decimal'   :
+            case 'float'     :
+            case 'enum'      :
+            case 'set'       :
+                /** bit(1), double([0, 2]), float([0, 2]), float([1]), enum(['A', 'B', 'C']) */
                 return $this->setType($method, $args[0]);
                 break;
             
@@ -113,31 +98,13 @@ class Hoff
                 return $this->setType($method);
                 break;
             
-            /** Two lengths required */
-            case 'double' :
-            case 'decimal':
-                /** double([0, 2]) */
-                return $this->setType($method, $args[0]);
-                break;
-            
-            /** One or two lengths required */
-            case 'float':
-                /** float([0, 2]) or float([1]) or float(1) */
-                return $this->setType($method, $args[0]);
-                break;
-            
-            /** Options length */
-            case 'enum':
-            case 'set' :
-                /** enum(['A', 'B', 'C']) */
-                return $this->setType($method, $args[0]);
-                break; 
-            
+            /** Table types */
             case 'InnoDB':
             case 'MyISAM':
                 return $this->setTableType($method);
                 break;
             
+            /** Indexs */
             case 'primary' :
             case 'unique'  :
             case 'index'   :
@@ -145,12 +112,6 @@ class Hoff
                 $columns   = isset($args[1]) ? $args[1] : null;
                 return $this->setIndex($method, $groupName, $columns);
                 break;
-                
-            //case 'nullable':
-            //case 'comment' :
-            //case 'unsigned':
-            //    return call_user_func_array([$this, '_' . $method], $args);
-            //    break;
             
             /** Default functions */
             default:
@@ -158,13 +119,64 @@ class Hoff
                 break;
         }
     }
+    
+    
+    
+    
+    /**
+     * Clean the previous data.
+     * 
+     * @return Hoff
+     */
+     
+    function clean()
+    {
+        $this->columns = [];
+        $this->table   = ['name'        => null,
+                          'type'        => 'INNODB',
+                          'uniqueKeys'  => [],
+                          'primaryKeys' => [],
+                          'indexKeys'   => [],
+                          'comment'     => null];
+        
+        return $this;
+    }
+    
+    
+    
+    
+    /**
+     * Set the table types
+     * 
+     * @param string $type   The type of the table, InnoDB or MyISAM.
+     * 
+     * @return Hoff
+     */
+     
+    function setTableType($type)
+    {
+        $this->table['type'] = $type;
+        
+        return $this;
+    }
+    
+    
+    
+    
+    /**
+     * Set the type of the column(last).
+     * 
+     * @param string $type     The data type of the column.
+     * @param mixed  $length   Can be the options of the type, or length of the type.
+     * 
+     * @return Hoff
+     */
  
-    function setType($type, $length = null, $extras = null)
+    function setType($type, $length = null)
     {
         $this->setLastColumnValue('type'  , $type);
         $this->setLastColumnValue('length', $length);
-        $this->setLastColumnValue('extras', $extras);
-        
+
         return $this;
     }
     
@@ -178,7 +190,9 @@ class Hoff
     /***********************************************
     
     /**
-     *
+     * Build the query from the columns.
+     * 
+     * @return string   The query.
      */
     
     function columnBuilder()
@@ -297,7 +311,9 @@ class Hoff
     
     
     /**
-     *
+     * Build the whole query which used to create a table.
+     * 
+     * @return string   The query.
      */
      
     function tableBuilder()
@@ -349,7 +365,12 @@ class Hoff
     
     
     /**
+     * The builder which used to generate the query of the index, unique, primary keys.
      * 
+     * @param string $indexName   The index prefix, ex: `PRIMARY KEY`, `UNIQUE KEY`, `INDEX`.
+     * @param array  $keys        The assoc or 1D array, assoc array for grouping keys.
+     * 
+     * @return string   The query.
      */
     
     function indexBuilder($indexName, $keys)
@@ -384,8 +405,6 @@ class Hoff
 
     
     
-    
-    
     /***********************************************
     /***********************************************
     /**************** I N D E X S ******************
@@ -393,7 +412,13 @@ class Hoff
     /***********************************************
     
     /**
+     * Set the index, unqiue, primary keys.
      * 
+     * @param string $indexType   The type of the index, ex: `primary`, `unique`, `index`.
+     * @param mixed  $groupName   The name of the group, make an anonymous index when this is an array.
+     * @param array  $columns     The columns of the group of the index.
+     * 
+     * @return Hoff
      */
      
     function setIndex($indexType, $groupName = null, $columns = [])
@@ -431,6 +456,70 @@ class Hoff
  
  
  
+ 
+    /***********************************************
+    /***********************************************
+    /****************** M A I N ********************
+    /***********************************************
+    /***********************************************
+    
+    /**
+     * Generate the query, execute it, create the table.
+     * 
+     * @param string      $tableName   The name of the table.
+     * @param string|null $comment     The comment of the table.
+     * 
+     * @return Hoff
+     */
+     
+    function _create($tableName, $comment = null)
+    {
+        if($comment)
+            $this->table['comment'] = $comment;
+        
+        $this->table['name'] = $tableName;
+        
+        $query = $this->tableBuilder();
+        
+        $this->db->rawQuery($query);
+        
+        $this->lastQuery = $query;
+        
+        $this->clean();
+        
+        return $this;
+    }
+    
+    
+    
+    
+    /**
+     * Create a column.
+     * 
+     * @param string $columnName   The name of the column.
+     * 
+     * @return Hoff
+     */
+     
+    function _column($columnName)
+    {
+        $this->columns[] = ['name'          => $columnName,
+                            'type'          => null,
+                            'length'        => null,
+                            'comment'       => null,
+                            'unsigned'      => false,
+                            'primary'       => null,
+                            'unique'        => null,
+                            'index'         => null,
+                            'autoIncrement' => false,
+                            'default'       => false,
+                            'nullable'      => false,
+                            'extras'        => []];
+        return $this;
+    }
+ 
+    
+    
     
     /***********************************************
     /***********************************************
@@ -439,7 +528,12 @@ class Hoff
     /***********************************************
     
     /**
+     * Set the value of the last column.
      * 
+     * @param string $name    The name of the data.
+     * @param mixed  $value   The value of the data.
+     * 
+     * @return Hoff
      */
      
     function setLastColumnValue($name, $value)
@@ -452,8 +546,13 @@ class Hoff
         return $this;
     }
     
+    
+    
+    
     /**
+     * Make the column nullable, and set it's DEFAULT as NULL.
      * 
+     * @return Hoff
      */
      
     function _nullable()
@@ -468,7 +567,9 @@ class Hoff
     
     
     /**
+     * Make the column UNSIGNED.
      * 
+     * @return Hoff
      */
      
     function _unsigned()
@@ -482,7 +583,11 @@ class Hoff
     
     
     /**
+     * Set a comment of the column.
      * 
+     * @param string $comment   The comment of the column.
+     * 
+     * @return Hoff
      */
     
     function _comment($comment)
@@ -496,7 +601,11 @@ class Hoff
     
     
     /**
+     * Set the DEFAULT value of the column.
      * 
+     * @param mixed $default   The default value of the column.
+     * 
+     * @return Hoff
      */
     
     function _default($default)
@@ -506,8 +615,13 @@ class Hoff
         return $this;
     }
     
+    
+    
+    
     /**
+     * Make the column AUTO_INCREMENT.
      * 
+     * @return Hoff
      */
      
     function _autoIncrement()
