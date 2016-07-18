@@ -47,8 +47,8 @@ class Hoff
         
         $this->clean();
         // @codeCoverageIgnoreEnd
-    }
-    
+    } // @codeCoverageIgnore
+
     
 
  
