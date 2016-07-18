@@ -47,6 +47,7 @@ class Hoff
                             'type'          => null,
                             'length'        => null,
                             'comment'       => $comment,
+                            'unsigned'      => false,
                             'primary'       => null,
                             'unique'        => null,
                             'index'         => null,
@@ -181,7 +182,7 @@ class Hoff
              */
              
             if($comment)
-                $query .= "COMMENT=\"$comment\"";
+                $query .= "COMMENT='$comment'";
                 
             /**
              * End
@@ -194,6 +195,13 @@ class Hoff
         $query = rtrim($query, ', ');
     }
     
+    function tableBuilder()
+    {
+        $tableName = null;
+        $columns = null;
+        $type = ['MYISAM', 'INNODB'];
+        $query = "CREATE TABLE $tableName ($columns) TYPE=$type COMMENT='123'";
+    }
     
     function comment($comment)
     {
