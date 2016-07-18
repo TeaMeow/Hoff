@@ -257,7 +257,7 @@ class Hoff
                 else
                     $default = "'$default'";
                     
-                $query .= "DEFAULT $default";
+                $query .= "DEFAULT $default ";
             }
             
             /**
@@ -332,11 +332,16 @@ class Hoff
             $query .= "($columns) ";
         
         if($type)
-            $query .= "ENGINE=$type ";
+            $query .= "ENGINE=$type, ";
             
         if($comment)
-            $query .= "COMMENT='$comment' ";
+            $query .= "COMMENT='$comment', ";
+        
+        /** Remove the last unnecessary comma */
+        $query = rtrim($query, ', ');
+        
         echo "\n\n" . $query . "\n\n";
+        
         return $query;
     }
     
