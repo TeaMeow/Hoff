@@ -38,15 +38,15 @@ class Hoff
     
     /**
      * CONSTRUCT
-     * 
-     * @codeCoverageIgnore
      */
      
     function __construct($db)
     {
+        // @codeCoverageIgnoreStart
         $this->db = $db;
         
         $this->clean();
+        // @codeCoverageIgnoreEnd
     }
     
     
