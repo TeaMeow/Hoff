@@ -48,7 +48,12 @@ class Hoff
         
         $this->table['name'] = $tableName;
         
-        $this->db->rawQuery($this->tableBuilder());
+        $query = $this->tableBuilder();
+        
+        $this->db->rawQuery($query);
+        
+        $this->lastQuery = $query;
+        
         $this->clean();
         
         return $this;
@@ -345,11 +350,10 @@ class Hoff
                 $query .= "$indexName `$groupName` ($columns), ";
             }
         }
-        elseif(!empty($keys))
+        elseif(!empty($keys) && $keys)
         {
             foreach($keys as $columns)
             {
-                echo var_dump($columns);
                 $columns = "`" . implode("`,`", $columns) . "`";
                 
                 $query .= "$indexName ($columns), ";
