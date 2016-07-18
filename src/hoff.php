@@ -31,6 +31,10 @@ class Hoff
     
     function create($tableName, $comment = null)
     {
+        $columns = $this->columnBuilder();
+        
+        echo var_dump($columns);
+        
         $this->db->rawQuery("CREATE TABLE $tableName ($columns)");
         $this->clean();
         
@@ -152,6 +156,13 @@ class Hoff
                 $query .= "$type($lengthForQueryQuotes) ";
             
             /**
+             * Unsigned
+             */
+            
+            if($unsigned)
+                $query .= 'UNSIGNED ';
+            
+            /**
              * Nullable
              */
              
@@ -159,12 +170,28 @@ class Hoff
                 $query .= 'NOT NULL ';
             
             /**
+             * Primary key
+             */
+            
+            if($primary && !is_array($primary))
+                $query .= 'PRIMARY ';
+            
+            /**
              * Comment
              */
              
             if($comment)
                 $query .= "COMMENT=\"$comment\"";
+                
+            /**
+             * End
+             */
+            
+            $query .= ', ';
         }
+        
+        /** Remove the last unnecessary comma */
+        $query = rtrim($query, ', ');
     }
     
     
@@ -178,6 +205,10 @@ class Hoff
     }
     
     function setIndex()
+    {
+    }
+    
+    function primary($with = [])
     {
     }
     
