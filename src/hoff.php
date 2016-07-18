@@ -362,8 +362,6 @@ class Hoff
         }
         elseif(!empty($keys) && $keys)
         {
-            echo "\n\n ------" . var_dump($keys) . "\n\n ------";
-            
             foreach($keys as $columns)
             {
                 $columns = "`" . implode("`,`", $columns) . "`";
@@ -414,7 +412,7 @@ class Hoff
         /** primary(['username', 'nickname']) */
         elseif(is_array($groupName) && empty($columns))
         {
-            $this->table[$indexArray][] = $columns;
+            $this->table[$indexArray][] = $groupName;
         }
         
         /** primary('groupName', ['username', 'nickname']) */

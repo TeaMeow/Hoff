@@ -43,14 +43,14 @@ class HoffTest extends \PHPUnit_Framework_TestCase
                    ->column('test21')->time()
                    ->column('test22')->timestamp()
                    ->column('test23')->year()
-                   ->column('test24')->double([1, 2])
-                   ->column('test25')->decimal([1, 2])
-                   ->column('test26')->float([1, 2])
+                   ->column('test24')->double([2, 1])
+                   ->column('test25')->decimal([2, 1])
+                   ->column('test26')->float([2, 1])
                    ->column('test27')->float([1])
                    ->column('test28')->enum([1, 2, 3, 'A', 'B', 'C'])
                    ->column('test29')->set([1, 2, 3, 'A', 'B', 'C'])
                    ->create('test_table1');
-        echo "\n\n". $this->hoff->lastQuery . "\n\n";
+                   
         //$this->assertEquals('CREATE TABLE test_table (test varchar(32) NOT NULL PRIMARY KEY) ENGINE=INNODB ', $this->hoff->lastQuery);
     }
             
@@ -102,7 +102,7 @@ class HoffTest extends \PHPUnit_Framework_TestCase
                    ->column('test2')->varchar(32)
                    ->create('test_table5');
                    
-        $this->assertEquals('', $this->hoff->lastQuery);
+        $this->assertEquals('CREATE TABLE test_table5 (test varchar(32) NOT NULL UNIQUE , test2 varchar(32) NOT NULL) ENGINE=INNODB ', $this->hoff->lastQuery);
     }
     
     function testNamingUniqueKey()
@@ -133,9 +133,9 @@ class HoffTest extends \PHPUnit_Framework_TestCase
     
     function testIndexKey()
     {
-        $this->hoff->column('test')->varchar(32)->index()
+        $this->hoff->column('test')->varchar(32)
                    ->column('test2')->varchar(32)
-                   ->create('test_table8');
+                   ->index(['test'])->create('test_table8');
                    
         $this->assertEquals('', $this->hoff->lastQuery);
     }
