@@ -278,7 +278,7 @@ class Hoff
              */
              
             if($comment)
-                $query .= "COMMENT='$comment' ";
+                $query .= "COMMENT '$comment' ";
                 
             /**
              * End

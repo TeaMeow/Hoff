@@ -69,10 +69,10 @@ class HoffTest extends \PHPUnit_Framework_TestCase
     
     function testDefault()
     {
-        $this->hoff->column('test')->varchar(32)->default(null)
+        $this->hoff->column('test')->varchar(32)->nullable->default(null)
                    ->create('test_default_null_table');
                    
-        $this->assertEquals('CREATE TABLE test_default_null_table (test varchar(32) NOT NULL DEFAULT NULL) ENGINE=INNODB', $this->hoff->lastQuery);
+        $this->assertEquals('CREATE TABLE test_default_null_table (test varchar(32) DEFAULT NULL) ENGINE=INNODB', $this->hoff->lastQuery);
         
         $this->hoff->column('test')->varchar(32)->default('string')
                    ->create('test_default_string_table');
@@ -114,7 +114,7 @@ class HoffTest extends \PHPUnit_Framework_TestCase
         $this->hoff->column('test')->int(10)->comment('月月，搭拉安！')
                    ->create('test_column_comment_table');
                    
-        $this->assertEquals("CREATE TABLE test_column_comment_table (test int(10) NOT NULL COMMENT='月月，搭拉安！') ENGINE=INNODB", $this->hoff->lastQuery);
+        $this->assertEquals("CREATE TABLE test_column_comment_table (test int(10) NOT NULL COMMENT '月月，搭拉安！') ENGINE=INNODB", $this->hoff->lastQuery);
     }
     
     function testTableComment()
