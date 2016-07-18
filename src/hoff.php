@@ -218,6 +218,10 @@ class Hoff
             /** FLOAT(1, 2) or ENUM(1, 2, 'A', 'B') */
             elseif($type && $length && is_array($length) && isset($length[0])) 
                 $query .= "$type($options) ";
+            
+            /** DATETIME */
+            else
+                $query .= "$type ";
                 
             /**
              * Unsigned
@@ -257,11 +261,17 @@ class Hoff
             }
             
             /**
-             * Primary key
+             * Keys
              */
             
             if($primary && !is_array($primary))
                 $query .= 'PRIMARY KEY ';
+            
+            if($unique && !is_array($unique))
+                $query .= 'UNIQUE ';
+            
+            if($index && !is_array($index))
+                $query .= 'INDEX ';
             
             /**
              * Comment
