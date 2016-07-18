@@ -16,28 +16,20 @@ class Hoff
     
     function __construct($db)
     {
-        $this->db    = $db;
+        $this->db = $db;
         
-        $this->types = ['tinyint' , 'smallint' , 'mediumint', 'int'       , 'bigint'  , 
-                         'float'   , 'double'   , 'decimal'  , 'bit'       , 'char'    ,
-                         'varchar' , 'tinytext' , 'text'     , 'mediumtext', 'longtext', 
-                         'binary'  , 'varbinary', 
-                         'tinyblob', 'blob'     , 'mediumblob', 'longblob', 
-                         'enum'    , 'set'      , 'date'      , 'datetime', 'time', 'timestamp', 'year'];
-        
-        $this->table = ['name'        => null,
-                        'type'        => 'INNODB',
-                        'uniqueKeys'  => [],
-                        'primaryKeys' => [],
-                        'indexKeys'   => [],
-                        'comment'     => null];
-        
-        $this->indexTypes = ['index', 'unique', 'primary'];
+        $this->clean();
     }
     
     function clean()
     {
         $this->columns = [];
+        $this->table   = ['name'        => null,
+                          'type'        => 'INNODB',
+                          'uniqueKeys'  => [],
+                          'primaryKeys' => [],
+                          'indexKeys'   => [],
+                          'comment'     => null];
     }
     
     function setTableType($type)
@@ -46,7 +38,7 @@ class Hoff
     }
  
     
-    function create($tableName, $comment = null)
+    function _create($tableName, $comment = null)
     {
         if($comment)
             $this->table['comment'] = $comment;
@@ -57,7 +49,7 @@ class Hoff
         return $this;
     }
     
-    function column($columnName)
+    function _column($columnName)
     {
         $this->columns[] = ['name'          => $columnName,
                             'type'          => null,
@@ -380,7 +372,7 @@ class Hoff
         /** primary('groupName', ['username', 'nickname']) */
         elseif($groupName && !empty($columns))
         {
-            $this->table[$indexArray][] = $columns;
+            $this->table[$indexArray][$groupName] = $columns;
         }
         
         return $this;
