@@ -161,12 +161,9 @@ class Hoff
  
     function setType($type, $length = null, $extras = null)
     {
-        end($this->columns);
-        $lastColumn = &$this->columns[key($this->columns)];
-        
-        $lastColumn['type']   = $type;
-        $lastColumn['length'] = $length;
-        $lastColumn['extras'] = $extras;
+        $this->setLastColumnValue('type'  , $type);
+        $this->setLastColumnValue('length', $length);
+        $this->setLastColumnValue('extras', $extras);
         
         return $this;
     }
@@ -192,10 +189,17 @@ class Hoff
         {
             extract($column);
             
-            $lengthForQuery       = is_array($length) ? implode(', ', $length) 
-                                                      : null;
-            $lengthForQueryQuotes = is_array($length) ? "'" . implode("','", $length) . "'" 
-                                                      : null;
+            
+            $options = [];
+            
+            if(is_array($length))
+                foreach($length as $single)
+                    if(is_int($single))
+                        $options[] = $single;
+                    else
+                        $options[] = "'$single'";
+            
+            $options = empty($options) ? '' : implode(", ", $options);
                                                       
             /**
              * Column name
@@ -211,14 +215,10 @@ class Hoff
             if($type && $length && !is_array($length))
                 $query .= "$type($length) ";
             
-            /** FLOAT(1, 2) */
-            elseif($type && $length && is_array($length) && isset($length[0]) && is_int($length[0])) 
-                $query .= "$type($lengthForQuery) ";
-            
-            /** ENUM('A', 'B', 'C') */
-            elseif($type && $length && is_array($length) && isset($length[0]) && !is_int($length[0]))
-                $query .= "$type($lengthForQueryQuotes) ";
-            
+            /** FLOAT(1, 2) or ENUM(1, 2, 'A', 'B') */
+            elseif($type && $length && is_array($length) && isset($length[0])) 
+                $query .= "$type($options) ";
+                
             /**
              * Unsigned
              */
