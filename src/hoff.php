@@ -321,7 +321,7 @@ class Hoff
             
         if($comment)
             $query .= "COMMENT='$comment' ";
-        
+        echo "\n\n" . $query . "\n\n";
         return $query;
     }
     
@@ -349,6 +349,7 @@ class Hoff
         {
             foreach($keys as $columns)
             {
+                echo var_dump($columns);
                 $columns = "`" . implode("`,`", $columns) . "`";
                 
                 $query .= "$indexName ($columns), ";
