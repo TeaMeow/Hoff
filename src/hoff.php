@@ -29,7 +29,8 @@ class Hoff
                         'type'        => 'INNODB',
                         'uniqueKeys'  => [],
                         'primaryKeys' => [],
-                        'indexKeys'   => []];
+                        'indexKeys'   => [],
+                        'comment'     => null];
         
         $this->indexTypes = ['index', 'unique', 'primary'];
     }
@@ -135,10 +136,15 @@ class Hoff
                 return $this->setTableType($method);
                 break;
             
-            case 'nullable':
             case 'primary' :
             case 'unique'  :
             case 'index'   :
+                $groupName = isset($args[0]) ? $args[0] : null;
+                $columns   = isset($args[1]) ? $args[1] : null;
+                $this->setIndex($method, $groupName, $columns);
+                break;
+                
+            case 'nullable':
             case 'comment' :
             case 'unsigned':
                 return call_user_func_array([$this, '_' . $method], $args);
@@ -260,13 +266,40 @@ class Hoff
      
     function tableBuilder()
     {
+        $query = '';
+        
         $columns = $this->columnBuilder();
         
         extract($this->table);
         
-        $uniqueKeys = $this->uniqueBuilder($uniqueKeys);
+        $primaryKeys = !empty($primaryKeys) ? $this->indexBuilder('PRIMARY KEY', $primaryKeys) : null;
+        $uniqueKeys  = !empty($uniqueKeys)  ? $this->indexBuilder('UNIQUE KEY' , $uniqueKeys)  : null;
+        $indexKeys   = !empty($indexKeys)   ? $this->indexBuilder('INDEX'      , $indexKeys)   : null;
         
-        $query = "CREATE TABLE $name ($columns) TYPE=$type COMMENT='$comment'";
+        $query = "CREATE TABLE $name ";
+        
+        if($primaryKeys && !$uniqueKeys && !$indexKeys)
+            $query .= "($columns, $primaryKeys) ";
+        elseif(!$primaryKeys && $uniqueKeys && !$indexKeys)
+            $query .= "($columns, $uniqueKeys) ";
+        elseif(!$primaryKeys && !$uniqueKeys && $indexKeys)
+            $query .= "($columns, $indexKeys) ";
+        elseif($primaryKeys && $uniqueKeys && !$indexKeys)
+            $query .= "($columns, $primaryKeys, $uniqueKeys) ";
+        elseif($primaryKeys && $uniqueKeys && $indexKeys)
+            $query .= "($columns, $primaryKeys, $uniqueKeys, $indexKeys) ";
+        elseif(!$primaryKeys && $uniqueKeys && $indexKeys)
+            $query .= "($columns, $uniqueKeys, $indexKeys) ";
+        elseif($primaryKeys && !$uniqueKeys && $indexKeys)
+            $query .= "($columns, $primaryKeys, $indexKeys) ";
+        
+        if($type)
+            $query .= "TYPE=$type ";
+            
+        if($comment)
+            $query .= "COMMENT='$comment' ";
+        
+        return $query;
     }
     
     
@@ -276,15 +309,27 @@ class Hoff
      * 
      */
     
-    function uniqueBuilder($uniqueKeys)
+    function indexBuilder($indexName, $keys)
     {
         $query = '';
         
-        foreach($uniqueKeys as $groupName => $columns)
+        if(array_keys($keys) !== range(0, count($keys) - 1))
         {
-            $columns = "`" . implode("`,`", $columns) . "`";
-            
-            $query .= "UNIQUE KEY `$groupName` ($columns), ";
+            foreach($keys as $groupName => $columns)
+            {
+                $columns = "`" . implode("`,`", $columns) . "`";
+                
+                $query .= "$indexName `$groupName` ($columns), ";
+            }
+        }
+        elseif(!empty($keys))
+        {
+            foreach($keys as $columns)
+            {
+                $columns = "`" . implode("`,`", $columns) . "`";
+                
+                $query .= "$indexName ($columns), ";
+            }
         }
         
         /** Remove the last unnecessary comma */
@@ -292,6 +337,8 @@ class Hoff
         
         return $query;
     }
+    
+
     
     
     
@@ -306,37 +353,41 @@ class Hoff
      * 
      */
      
-    function _primary($name = null, $with = [])
+    function setIndex($indexType, $groupName = null, $columns = [])
     {
+        if($indexType === 'primary')
+            $indexArray = 'primaryKeys';
+        elseif($indexType === 'unique')
+            $indexArray = 'uniqueKeys';
+        elseif($indexType === 'index')
+            $indexArray = 'indexKeys';
+        
+        /** column()->primary() */
+        if(!$groupName && empty($columns))
+        {
+            end($this->columns);
+            $lastColumn = &$this->columns[key($this->columns)];
+            
+            $lastColumn[$indexType] = true;
+        }
+        
+        /** primary(['username', 'nickname']) */
+        elseif(is_array($groupName) && empty($columns))
+        {
+            $this->table[$indexArray][] = $columns;
+        }
+        
+        /** primary('groupName', ['username', 'nickname']) */
+        elseif($groupName && !empty($columns))
+        {
+            $this->table[$indexArray][] = $columns;
+        }
+        
         return $this;
     }
-    
-    
-    
-    
-    /**
-     * 
-     */
-     
-    function _unique($name = null, $with = [])
-    {
-        return $this;
-    }
-    
-    
-    
-    
-    /**
-     * 
-     */
-     
-    function _index($name = null, $with = [])
-    {
-        return $this;
-    }
-    
-    
-    
+ 
+ 
+ 
     
     /***********************************************
     /***********************************************
@@ -389,6 +440,23 @@ class Hoff
         $lastColumn = &$this->columns[key($this->columns)];
         
         $lastColumn['comment'] = $comment;
+        
+        return $this;
+    }
+    
+    
+    
+    
+    /**
+     * 
+     */
+    
+    function _default($default)
+    {
+        end($this->columns);
+        $lastColumn = &$this->columns[key($this->columns)];
+        
+        $lastColumn['default'] = $default;
         
         return $this;
     }
