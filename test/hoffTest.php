@@ -69,7 +69,7 @@ class HoffTest extends \PHPUnit_Framework_TestCase
     
     function testDefault()
     {
-        $this->hoff->column('test')->varchar(32)->nullable->default(null)
+        $this->hoff->column('test')->varchar(32)->nullable()->default(null)
                    ->create('test_default_null_table');
                    
         $this->assertEquals('CREATE TABLE test_default_null_table (test varchar(32) DEFAULT NULL) ENGINE=INNODB', $this->hoff->lastQuery);
