@@ -40,6 +40,7 @@ class Hoff
     }
  
     
+    
     function _create($tableName, $comment = null)
     {
         if($comment)
@@ -228,18 +229,41 @@ class Hoff
                 $query .= 'NOT NULL ';
             
             /**
+             * Auto increment
+             */
+            
+            if($autoIncrement)
+                $query .= 'AUTO_INCREMENT ';
+            
+            /**
+             * Default
+             */
+            
+            if($default !== false)
+            {
+                if(is_int($default))
+                    $default = $default;
+                elseif(is_null($default))
+                    $default = "NULL";
+                else
+                    $default = "'$default'";
+                    
+                $query .= "DEFAULT $default";
+            }
+            
+            /**
              * Primary key
              */
             
             if($primary && !is_array($primary))
-                $query .= 'PRIMARY ';
+                $query .= 'PRIMARY KEY ';
             
             /**
              * Comment
              */
              
             if($comment)
-                $query .= "COMMENT='$comment'";
+                $query .= "COMMENT='$comment' ";
                 
             /**
              * End
@@ -398,14 +422,25 @@ class Hoff
      * 
      */
      
-    function _nullable()
+    function setLastColumnValue($name, $value)
     {
         end($this->columns);
         $lastColumn = &$this->columns[key($this->columns)];
         
-        $lastColumn['nullable'] = true;
-        $lastColumn['default']  = null;
+        $lastColumn[$name] = $value;
         
+        return $this;
+    }
+    
+    /**
+     * 
+     */
+     
+    function _nullable()
+    {
+        $this->setLastColumnValue('nullable', true);
+        $this->setLastColumnValue('default', null);
+
         return $this;
     }
     
@@ -418,10 +453,7 @@ class Hoff
      
     function _unsigned()
     {
-        end($this->columns);
-        $lastColumn = &$this->columns[key($this->columns)];
-        
-        $lastColumn['unsigned'] = true;
+        $this->setLastColumnValue('unsigned', true);
         
         return $this;
     }
@@ -435,10 +467,7 @@ class Hoff
     
     function _comment($comment)
     {
-        end($this->columns);
-        $lastColumn = &$this->columns[key($this->columns)];
-        
-        $lastColumn['comment'] = $comment;
+        $this->setLastColumnValue('comment', $comment);
         
         return $this;
     }
@@ -452,10 +481,18 @@ class Hoff
     
     function _default($default)
     {
-        end($this->columns);
-        $lastColumn = &$this->columns[key($this->columns)];
-        
-        $lastColumn['default'] = $default;
+        $this->setLastColumnValue('default', $default);
+
+        return $this;
+    }
+    
+    /**
+     * 
+     */
+     
+    function _autoIncrement()
+    {
+        $this->setLastColumnValue('autoIncrement', true);
         
         return $this;
     }
