@@ -45,7 +45,7 @@ class Hoff
         if($comment)
             $this->table['comment'] = $comment;
         
-        $this->table['name'] = $name;
+        $this->table['name'] = $tableName;
         
         $this->db->rawQuery($this->tableBuilder());
         $this->clean();
