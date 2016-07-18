@@ -88,24 +88,28 @@ class Hoff
                 break;
             
             /** Two lengths required */
-            case 'double'    :
-            case 'decimal'   :
+            case 'double' :
+            case 'decimal':
                 /** double([0, 2]) */
                 return $this->setType($method, $args[0]);
                 break;
             
             /** One or two lengths required */
-            case 'float'     :
+            case 'float':
                 /** float([0, 2]) or float([1]) or float(1) */
                 return $this->setType($method, $args[0]);
                 break;
             
             /** Options length */
-            case 'enum'      :
-            case 'set'       :
+            case 'enum':
+            case 'set' :
                 /** enum(['A', 'B', 'C']) */
                 return $this->setType($method, $args[0]);
                 break; 
+            
+            /** Default functions */
+            default:
+                return call_user_func_array([$this, $method], $args);
         }
     }
     

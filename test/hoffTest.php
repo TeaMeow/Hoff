@@ -12,7 +12,7 @@ class HoffTest extends \PHPUnit_Framework_TestCase
     
     function testBuild()
     {
-        $this->hoff->column('test')->create('test_table');
+        $this->hoff->column('test')->->create('test_table');
         
         echo var_dump($this->hoff->columns);
     }
