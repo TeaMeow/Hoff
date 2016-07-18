@@ -133,18 +133,19 @@ class Hoff
             case 'index'   :
                 $groupName = isset($args[0]) ? $args[0] : null;
                 $columns   = isset($args[1]) ? $args[1] : null;
-                $this->setIndex($method, $groupName, $columns);
+                return $this->setIndex($method, $groupName, $columns);
                 break;
                 
-            case 'nullable':
-            case 'comment' :
-            case 'unsigned':
-                return call_user_func_array([$this, '_' . $method], $args);
-                break;
+            //case 'nullable':
+            //case 'comment' :
+            //case 'unsigned':
+            //    return call_user_func_array([$this, '_' . $method], $args);
+            //    break;
             
             /** Default functions */
             default:
-                return call_user_func_array([$this, $method], $args);
+                return call_user_func_array([$this, '_' . $method], $args);
+                break;
         }
     }
  
