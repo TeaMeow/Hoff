@@ -355,9 +355,7 @@ class Hoff
         
         /** Remove the last unnecessary comma */
         $query = rtrim($query, ', ');
-        
-        echo "\n\n" . $query . "\n\n";
-        
+
         return $query;
     }
     
