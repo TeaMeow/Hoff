@@ -9,6 +9,10 @@ class Hoff
     private $db = null;
     
     public $columns = [];
+    public $table = [];
+    public $primarys = [];
+    
+    public $lastQuery = '';
     
     function __construct($db)
     {
@@ -21,6 +25,12 @@ class Hoff
                          'tinyblob', 'blob'     , 'mediumblob', 'longblob', 
                          'enum'    , 'set'      , 'date'      , 'datetime', 'time', 'timestamp', 'year'];
         
+        $this->table = ['name'        => null,
+                        'type'        => 'INNODB',
+                        'uniqueKeys'  => [],
+                        'primaryKeys' => [],
+                        'indexKeys'   => []];
+        
         $this->indexTypes = ['index', 'unique', 'primary'];
     }
     
@@ -29,24 +39,29 @@ class Hoff
         $this->columns = [];
     }
     
+    function setTableType($type)
+    {
+        $this->table['type'] = $type;
+    }
+ 
+    
     function create($tableName, $comment = null)
     {
-        $columns = $this->columnBuilder();
+        if($comment)
+            $this->table['comment'] = $comment;
         
-        echo var_dump($columns);
-        
-        $this->db->rawQuery("CREATE TABLE $tableName ($columns)");
+        $this->db->rawQuery($this->tableBuilder());
         $this->clean();
         
         return $this;
     }
     
-    function column($columnName, $comment = null)
+    function column($columnName)
     {
         $this->columns[] = ['name'          => $columnName,
                             'type'          => null,
                             'length'        => null,
-                            'comment'       => $comment,
+                            'comment'       => null,
                             'unsigned'      => false,
                             'primary'       => null,
                             'unique'        => null,
@@ -115,11 +130,50 @@ class Hoff
                 return $this->setType($method, $args[0]);
                 break; 
             
+            case 'InnoDB':
+            case 'MyISAM':
+                return $this->setTableType($method);
+                break;
+            
+            case 'nullable':
+            case 'primary' :
+            case 'unique'  :
+            case 'index'   :
+            case 'comment' :
+            case 'unsigned':
+                return call_user_func_array([$this, '_' . $method], $args);
+                break;
+            
             /** Default functions */
             default:
                 return call_user_func_array([$this, $method], $args);
         }
     }
+ 
+    function setType($type, $length = null, $extras = null)
+    {
+        end($this->columns);
+        $lastColumn = &$this->columns[key($this->columns)];
+        
+        $lastColumn['type']   = $type;
+        $lastColumn['length'] = $length;
+        $lastColumn['extras'] = $extras;
+        
+        return $this;
+    }
+    
+    
+    
+    
+    /***********************************************
+    /***********************************************
+    /************** B U I L D E R S ****************
+    /***********************************************
+    /***********************************************
+    
+    /**
+     *
+     */
     
     function columnBuilder()
     {
@@ -193,47 +247,108 @@ class Hoff
         
         /** Remove the last unnecessary comma */
         $query = rtrim($query, ', ');
+        
+        return $query;
     }
     
+    
+    
+    
+    /**
+     *
+     */
+     
     function tableBuilder()
     {
-        $tableName = null;
-        $columns = null;
-        $type = ['MYISAM', 'INNODB'];
-        $query = "CREATE TABLE $tableName ($columns) TYPE=$type COMMENT='123'";
+        $columns = $this->columnBuilder();
+        
+        extract($this->table);
+        
+        $uniqueKeys = $this->uniqueBuilder($uniqueKeys);
+        
+        $query = "CREATE TABLE $name ($columns) TYPE=$type COMMENT='$comment'";
     }
     
-    function comment($comment)
+    
+    
+    
+    /**
+     * 
+     */
+    
+    function uniqueBuilder($uniqueKeys)
     {
-        end($this->columns);
-        $lastColumn = &$this->columns[key($this->columns)];
+        $query = '';
         
-        $lastColumn['comment'] = $comment;
+        foreach($uniqueKeys as $groupName => $columns)
+        {
+            $columns = "`" . implode("`,`", $columns) . "`";
+            
+            $query .= "UNIQUE KEY `$groupName` ($columns), ";
+        }
         
+        /** Remove the last unnecessary comma */
+        $query = rtrim($query, ', ');
+        
+        return $query;
+    }
+    
+    
+    
+    
+    /***********************************************
+    /***********************************************
+    /**************** I N D E X S ******************
+    /***********************************************
+    /***********************************************
+    
+    /**
+     * 
+     */
+     
+    function _primary($name = null, $with = [])
+    {
         return $this;
     }
     
-    function setIndex()
-    {
-    }
     
-    function primary($with = [])
+    
+    
+    /**
+     * 
+     */
+     
+    function _unique($name = null, $with = [])
     {
-    }
-
-    function setType($type, $length = null, $extras = null)
-    {
-        end($this->columns);
-        $lastColumn = &$this->columns[key($this->columns)];
-        
-        $lastColumn['type']   = $type;
-        $lastColumn['length'] = $length;
-        $lastColumn['extras'] = $extras;
-        
         return $this;
     }
     
-    function nullable()
+    
+    
+    
+    /**
+     * 
+     */
+     
+    function _index($name = null, $with = [])
+    {
+        return $this;
+    }
+    
+    
+    
+    
+    /***********************************************
+    /***********************************************
+    /*************** H E L P E R S *****************
+    /***********************************************
+    /***********************************************
+    
+    /**
+     * 
+     */
+     
+    function _nullable()
     {
         end($this->columns);
         $lastColumn = &$this->columns[key($this->columns)];
@@ -244,12 +359,36 @@ class Hoff
         return $this;
     }
     
-    function unsigned()
+    
+    
+    
+    /**
+     * 
+     */
+     
+    function _unsigned()
     {
         end($this->columns);
         $lastColumn = &$this->columns[key($this->columns)];
         
         $lastColumn['unsigned'] = true;
+        
+        return $this;
+    }
+    
+    
+    
+    
+    /**
+     * 
+     */
+    
+    function _comment($comment)
+    {
+        end($this->columns);
+        $lastColumn = &$this->columns[key($this->columns)];
+        
+        $lastColumn['comment'] = $comment;
         
         return $this;
     }
