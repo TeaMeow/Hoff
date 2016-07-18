@@ -45,6 +45,8 @@ class Hoff
         if($comment)
             $this->table['comment'] = $comment;
         
+        $this->table['name'] = $name;
+        
         $this->db->rawQuery($this->tableBuilder());
         $this->clean();
         
@@ -287,6 +289,8 @@ class Hoff
             $query .= "($columns, $uniqueKeys, $indexKeys) ";
         elseif($primaryKeys && !$uniqueKeys && $indexKeys)
             $query .= "($columns, $primaryKeys, $indexKeys) ";
+        else
+            $query .= "($columns) ";
         
         if($type)
             $query .= "TYPE=$type ";
