@@ -33,14 +33,16 @@ class Hoff
     {
         $this->db->rawQuery("CREATE TABLE $tableName ($columns)");
         $this->clean();
+        
+        return $this;
     }
     
-    function column($columnName, $comment)
+    function column($columnName, $comment = null)
     {
         $this->columns[] = ['name'          => $columnName,
                             'type'          => null,
                             'length'        => null,
-                            'comment'       => null,
+                            'comment'       => $comment,
                             'primary'       => null,
                             'unique'        => null,
                             'index'         => null,
@@ -48,6 +50,7 @@ class Hoff
                             'default'       => false,
                             'nullable'      => false,
                             'extras'        => []];
+        return $this;
     }
 
     function __call($method, $args)
