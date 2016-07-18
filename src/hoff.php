@@ -362,6 +362,8 @@ class Hoff
         }
         elseif(!empty($keys) && $keys)
         {
+            echo "\n\n ------" . var_dump($keys) . "\n\n ------";
+            
             foreach($keys as $columns)
             {
                 $columns = "`" . implode("`,`", $columns) . "`";
