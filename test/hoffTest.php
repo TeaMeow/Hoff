@@ -1,6 +1,6 @@
 <?php
 require 'hoff.php';
-require '../test/library/MysqliDb.php';
+require 'library/MysqliDb.php';
 
 class HoffTest extends \PHPUnit_Framework_TestCase
 {
@@ -13,6 +13,8 @@ class HoffTest extends \PHPUnit_Framework_TestCase
     function testBuild()
     {
         $this->hoff->column('test')->create('test_table');
+        
+        echo var_dump($this->hoff->columns);
     }
 }
 ?>

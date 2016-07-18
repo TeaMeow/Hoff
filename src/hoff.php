@@ -8,7 +8,7 @@ class Hoff
     
     private $db = null;
     
-    private $columns = [];
+    public $columns = [];
     
     function __construct($db)
     {
@@ -54,7 +54,7 @@ class Hoff
     {
         switch($method)
         {
-            /** Length required */
+            /** One length required */
             case 'tinyint'   :
             case 'smallint'  :
             case 'mediumint' :
@@ -64,6 +64,8 @@ class Hoff
             case 'varchar'   :
             case 'binary'    :
             case 'varbinary' :
+            case 'bit'       :
+                /** bit(1) */
                 return $this->setType($method, $args[0]);
                 break;
             
@@ -81,16 +83,29 @@ class Hoff
             case 'time'      :
             case 'timestamp' :
             case 'year'      :
-                
-            case 'float'     :
+                /** year() */
+                return $this->setType($method);
+                break;
+            
+            /** Two lengths required */
             case 'double'    :
             case 'decimal'   :
-            case 'bit'       :
+                /** double([0, 2]) */
+                return $this->setType($method, $args[0]);
+                break;
             
+            /** One or two lengths required */
+            case 'float'     :
+                /** float([0, 2]) or float([1]) or float(1) */
+                return $this->setType($method, $args[0]);
+                break;
             
+            /** Options length */
             case 'enum'      :
             case 'set'       :
-            
+                /** enum(['A', 'B', 'C']) */
+                return $this->setType($method, $args[0]);
+                break; 
         }
     }
     
@@ -112,7 +127,7 @@ class Hoff
         return end($this->columns);
     }
     
-    function setType($type, $length, $extras = null)
+    function setType($type, $length = null, $extras = null)
     {
         $lastColumn = &$this->lastColumn();
         
