@@ -135,7 +135,7 @@ class HoffTest extends \PHPUnit_Framework_TestCase
     {
         $this->hoff->column('test')->varchar(32)
                    ->column('test2')->varchar(32)
-                   ->index(['test'])->create('test_table8');
+                   ->index('in_test', ['test'])->create('test_table8');
                    
         $this->assertEquals('', $this->hoff->lastQuery);
     }
