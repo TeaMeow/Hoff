@@ -26,7 +26,7 @@ build:
     - apt-get -y install mysql-server-5.7
     - service mysql start
     - mysqladmin -u root password ''
-    - mysql -u root -e "create database teameow"
+    - mysql -u root -e "create database hoff"
 
     # xdebug
     - printf "%s\n------------------------------\n--------  X D E B U G --------\n------------------------------%s\n%s\n"
