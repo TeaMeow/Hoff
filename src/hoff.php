@@ -29,7 +29,7 @@ class Hoff
         $this->columns = [];
     }
     
-    function create($tableName, $comment)
+    function create($tableName, $comment = null)
     {
         $this->db->rawQuery("CREATE TABLE $tableName ($columns)");
         $this->clean();
@@ -115,6 +115,58 @@ class Hoff
                 return call_user_func_array([$this, $method], $args);
         }
     }
+    
+    function columnBuilder()
+    {
+        $query = '';
+        
+        foreach($this->columns as $column)
+        {
+            extract($column);
+            
+            $lengthForQuery       = is_array($length) ? implode(', ', $length) 
+                                                      : null;
+            $lengthForQueryQuotes = is_array($length) ? "'" . implode("','", $length) . "'" 
+                                                      : null;
+                                                      
+            /**
+             * Column name
+             */
+             
+            $query .= "$name ";
+                
+            /**
+             * Data types
+             */
+             
+            /** VARCHAR(30) */
+            if($type && $length && !is_array($length))
+                $query .= "$type($length) ";
+            
+            /** FLOAT(1, 2) */
+            elseif($type && $length && is_array($length) && isset($length[0]) && is_int($length[0])) 
+                $query .= "$type($lengthForQuery) ";
+            
+            /** ENUM('A', 'B', 'C') */
+            elseif($type && $length && is_array($length) && isset($length[0]) && !is_int($length[0]))
+                $query .= "$type($lengthForQueryQuotes) ";
+            
+            /**
+             * Nullable
+             */
+             
+            if(!$nullable)
+                $query .= 'NOT NULL ';
+            
+            /**
+             * Comment
+             */
+             
+            if($comment)
+                $query .= "COMMENT=\"$comment\"";
+        }
+    }
+    
     
     function comment($comment)
     {
