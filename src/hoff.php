@@ -35,6 +35,8 @@ class Hoff
     function setTableType($type)
     {
         $this->table['type'] = $type;
+        
+        return $this;
     }
  
     
