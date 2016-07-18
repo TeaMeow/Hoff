@@ -188,7 +188,7 @@ class HoffTest extends \PHPUnit_Framework_TestCase
                    
         $this->assertEquals('CREATE TABLE test_table7 (test varchar(32) NOT NULL , test2 varchar(32) NOT NULL , test3 varchar(32) NOT NULL , test4 varchar(32) NOT NULL, UNIQUE KEY (`test`,`test2`), UNIQUE KEY (`test3`,`test4`)) ENGINE=INNODB', $this->hoff->lastQuery);
     }
-
+    
     function testNamingIndexKey()
     {
         $this->hoff->column('test')->varchar(32)
@@ -200,6 +200,33 @@ class HoffTest extends \PHPUnit_Framework_TestCase
                    ->create('test_table9');
                    
         $this->assertEquals('CREATE TABLE test_table9 (test varchar(32) NOT NULL , test2 varchar(32) NOT NULL , test3 varchar(32) NOT NULL , test4 varchar(32) NOT NULL, INDEX `ik_test` (`test`,`test2`), INDEX `ik_test2` (`test3`,`test4`)) ENGINE=INNODB', $this->hoff->lastQuery);
+    }
+    
+    function testMixedKeys()
+    {
+        $this->hoff->column('test')->varchar(32)
+                   ->column('test2')->varchar(32)
+                   ->column('test3')->varchar(32)
+                   ->column('test4')->varchar(32)
+                   ->primary(['test', 'test2'])
+                   ->unique(['test3', 'test4'])
+                   ->create('test_table10');
+                   
+        $this->hoff->column('test')->varchar(32)
+                   ->column('test2')->varchar(32)
+                   ->column('test3')->varchar(32)
+                   ->column('test4')->varchar(32)
+                   ->index('ik_test', ['test', 'test2'])
+                   ->unique(['test3', 'test4'])
+                   ->create('test_table11');
+        
+        $this->hoff->column('test')->varchar(32)
+                   ->column('test2')->varchar(32)
+                   ->column('test3')->varchar(32)
+                   ->column('test4')->varchar(32)
+                   ->primary(['test', 'test2'])
+                   ->index('ik_test', ['test3', 'test4'])
+                   ->create('test_table12');
     }
 }
 ?>
