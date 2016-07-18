@@ -317,7 +317,7 @@ class Hoff
             $query .= "($columns) ";
         
         if($type)
-            $query .= "TYPE=$type ";
+            $query .= "ENGINE=$type ";
             
         if($comment)
             $query .= "COMMENT='$comment' ";
