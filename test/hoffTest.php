@@ -47,11 +47,11 @@ class HoffTest extends \PHPUnit_Framework_TestCase
                    ->column('test25')->decimal([2, 1])
                    ->column('test26')->float([2, 1])
                    ->column('test27')->float([1])
-                   ->column('test28')->enum([1, 2, 3, 'A', 'B', 'C'])
-                   ->column('test29')->set([1, 2, 3, 'A', 'B', 'C'])
+                   ->column('test28')->enum(['1', '2', '3', 'A', 'B', 'C'])
+                   ->column('test29')->set(['1', '2', '3', 'A', 'B', 'C'])
                    ->create('test_table1');
                    
-        //$this->assertEquals('CREATE TABLE test_table (test varchar(32) NOT NULL PRIMARY KEY) ENGINE=INNODB ', $this->hoff->lastQuery);
+        $this->assertEquals("CREATE TABLE test_table1 (test tinyint(1) NOT NULL , test2 smallint(1) NOT NULL , test3 mediumint(1) NOT NULL , test4 int(1) NOT NULL , test5 bigint(1) NOT NULL , test6 char(1) NOT NULL , test7 varchar(1) NOT NULL , test8 binary(1) NOT NULL , test9 varbinary(1) NOT NULL , test10 bit(1) NOT NULL , test11 tinytext NOT NULL , test12 text NOT NULL , test13 mediumtext NOT NULL , test14 longtext NOT NULL , test15 tinyblob NOT NULL , test16 blob NOT NULL , test17 mediumblob NOT NULL , test18 longblob NOT NULL , test19 date NOT NULL , test20 datetime NOT NULL , test21 time NOT NULL , test22 timestamp NOT NULL , test23 year NOT NULL , test24 double(2, 1) NOT NULL , test25 decimal(2, 1) NOT NULL , test26 float(2, 1) NOT NULL , test27 float(1) NOT NULL , test28 enum('1', '2', '3', 'A', 'B', 'C') NOT NULL , test29 set('1', '2', '3', 'A', 'B', 'C') NOT NULL) ENGINE=INNODB ", $this->hoff->lastQuery);
     }
             
     function testTableType()
@@ -93,7 +93,7 @@ class HoffTest extends \PHPUnit_Framework_TestCase
                    ->primary(['test', 'test2'])
                    ->create('test_table4');
                    
-        $this->assertEquals('', $this->hoff->lastQuery);
+        $this->assertEquals('CREATE TABLE test_table4 (test varchar(32) NOT NULL , test2 varchar(32) NOT NULL, PRIMARY KEY (`test`,`test2`)) ENGINE=INNODB ', $this->hoff->lastQuery);
     }
     
     function testUniqueKey()
@@ -128,18 +128,9 @@ class HoffTest extends \PHPUnit_Framework_TestCase
                    ->unique(['test3', 'test4'])
                    ->create('test_table7');
                    
-        $this->assertEquals('', $this->hoff->lastQuery);
+        $this->assertEquals('CREATE TABLE test_table7 (test varchar(32) NOT NULL , test2 varchar(32) NOT NULL , test3 varchar(32) NOT NULL , test4 varchar(32) NOT NULL, UNIQUE KEY (`test`,`test2`), UNIQUE KEY (`test3`,`test4`)) ENGINE=INNODB ', $this->hoff->lastQuery);
     }
-    
-    function testIndexKey()
-    {
-        $this->hoff->column('test')->varchar(32)
-                   ->column('test2')->varchar(32)
-                   ->index('in_test', ['test'])->create('test_table8');
-                   
-        $this->assertEquals('', $this->hoff->lastQuery);
-    }
-    
+
     function testNamingIndexKey()
     {
         $this->hoff->column('test')->varchar(32)
@@ -151,19 +142,6 @@ class HoffTest extends \PHPUnit_Framework_TestCase
                    ->create('test_table9');
                    
         $this->assertEquals('CREATE TABLE test_table9 (test varchar(32) NOT NULL , test2 varchar(32) NOT NULL , test3 varchar(32) NOT NULL , test4 varchar(32) NOT NULL, INDEX `ik_test` (`test`,`test2`), INDEX `ik_test2` (`test3`,`test4`)) ENGINE=INNODB ', $this->hoff->lastQuery);
-    }
-    
-    function testMultiIndexKey()
-    {
-        $this->hoff->column('test')->varchar(32)
-                   ->column('test2')->varchar(32)
-                   ->column('test3')->varchar(32)
-                   ->column('test4')->varchar(32)
-                   ->index(['test', 'test2'])
-                   ->index(['test3', 'test4'])
-                   ->create('test_table10');
-        
-        $this->assertEquals('', $this->hoff->lastQuery);
     }
 }
 ?>
