@@ -197,7 +197,8 @@ class Hoff
     
     function comment($comment)
     {
-        $lastColumn = &$this->lastColumn();
+        end($this->columns);
+        $lastColumn = &$this->columns[key($this->columns)];
         
         $lastColumn['comment'] = $comment;
         
@@ -211,15 +212,11 @@ class Hoff
     function primary($with = [])
     {
     }
-    
-    function lastColumn()
-    {
-        return end($this->columns);
-    }
-    
+
     function setType($type, $length = null, $extras = null)
     {
-        $lastColumn = &$this->lastColumn();
+        end($this->columns);
+        $lastColumn = &$this->columns[key($this->columns)];
         
         $lastColumn['type']   = $type;
         $lastColumn['length'] = $length;
@@ -230,7 +227,8 @@ class Hoff
     
     function nullable()
     {
-        $lastColumn = &$this->lastColumn();
+        end($this->columns);
+        $lastColumn = &$this->columns[key($this->columns)];
         
         $lastColumn['nullable'] = true;
         $lastColumn['default']  = null;
@@ -240,7 +238,8 @@ class Hoff
     
     function unsigned()
     {
-        $lastColumn = &$this->lastColumn();
+        end($this->columns);
+        $lastColumn = &$this->columns[key($this->columns)];
         
         $lastColumn['unsigned'] = true;
         
