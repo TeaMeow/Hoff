@@ -195,7 +195,7 @@ class HoffTest extends \PHPUnit_Framework_TestCase
                    ->column('test2')->varchar(32)->index()
                    ->create('test_table14');
                    
-        $this->assertEquals('CREATE TABLE test_table14 (test varchar(32) NOT NULL , test2 varchar(32) NOT NULL , test3 varchar(32) NOT NULL , INDEX `test` (`test`), INDEX `test2` (`test2`)) ENGINE=INNODB', $this->hoff->lastQuery);
+        $this->assertEquals('CREATE TABLE test_table14 (test varchar(32) NOT NULL , test2 varchar(32) NOT NULL, INDEX `test` (`test`), INDEX `test2` (`test2`)) ENGINE=INNODB', $this->hoff->lastQuery);
     }
     
     function testNamingIndexKey()
