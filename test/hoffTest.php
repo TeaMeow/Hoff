@@ -1,6 +1,6 @@
 <?php
 require 'hoff.php';
-require 'library/MysqliDb.php';
+require '../library/MysqliDb.php';
 
 class HoffTest extends \PHPUnit_Framework_TestCase
 {
