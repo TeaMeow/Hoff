@@ -529,7 +529,7 @@ class Hoff
 
     function _drop($tableName)
     {
-        $query = "DROP TABLE $tableName";
+        $query = "DROP TABLE `$tableName`";
 
         $this->db->rawQuery($query);
 
