@@ -18,6 +18,13 @@ class HoffTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('CREATE TABLE test_table (test varchar(32) NOT NULL PRIMARY KEY) ENGINE=INNODB', $this->hoff->lastQuery);
     }
     
+    function testDrop()
+    {
+        $this->hoff->drop('test_table');
+                   
+        $this->assertEquals('DROP TABLE test_table', $this->hoff->lastQuery);
+    }
+    
     function testDataTypes()
     {
         $this->hoff->column('test')->tinyint(1)

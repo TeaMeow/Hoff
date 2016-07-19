@@ -1,0 +1,114 @@
+<?php
+include(__DIR__ . '/../library/MySQLi-Class/MysqliDb.php');
+include(__DIR__ . '/hoff.php');
+
+class HoffCMD
+{
+    /**
+     * Set the hoff file paths.
+     */
+     
+    function setHoff($hoffName)
+    {
+        $this->upstream   = $hoffName . '_up.php';
+        $this->downstream = $hoffName . '_down.php';
+        
+        if(!file_exists($this->upstream))
+            exit("Upstream file `$this->upstream` does not exist, exited.\n");
+        
+        if(!file_exists($this->downstream))
+            exit("Downstream file `$this->downstream` does not exist, exited.\n");
+            
+        return $this;
+    }
+    
+    
+    
+    
+    /**
+     * Migrate the tables.
+     */
+     
+    function migrate()
+    {
+        include($this->upstream);
+        
+        $Upstream = new Upstream();
+        $methods  = get_class_methods($Upstream);
+
+        foreach($methods as $method)
+        {
+            if($method != '__construct')
+            {
+                echo "$method\n";
+                $Upstream->$method();
+            }
+        }
+    }
+    
+    
+    
+    
+    /**
+     * Destory the tables.
+     */
+     
+    function destory()
+    {
+        include($this->downstream);
+            
+        $Downstream = new Downstream();
+        $methods  = get_class_methods($Downstream);
+
+        foreach($methods as $method)
+        {
+            if($method != '__construct')
+            {
+                echo "$method\n";
+                $Downstream->$method();
+            }
+        }
+    }
+}
+
+
+
+
+//***********************************************
+//***********************************************
+//************** C O M M A N D S ****************
+//***********************************************
+//***********************************************
+    
+$HoffCMD = new HoffCMD();
+
+/** php hoff migrate */
+if(isset($argv[1]) && $argv[1] === 'migrate' && isset($argv[2]))
+{
+    $HoffCMD->setHoff($argv[2])
+            ->migrate();
+}
+
+/** php hoff migrate --force */
+elseif(isset($argv[1]) && $argv[1] === 'migrate' && 
+       isset($argv[2]) && $argv[2] === '--force' &&
+       isset($argv[3]))
+{
+    $HoffCMD->setHoff($argv[3])
+            ->migrate();
+}
+
+/** php hoff migrate:destory */
+elseif(isset($argv[1]) && $argv[1] === 'migrate:destory' && 
+       isset($argv[2]))
+{
+    $HoffCMD->setHoff($argv[2])
+            ->destory();
+}
+
+else
+{
+    $command = implode(' ', $argv);
+    exit("Command `php $command` not found.\n");
+}
+?>

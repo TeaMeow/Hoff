@@ -515,7 +515,31 @@ class Hoff
                             'extras'        => []];
         return $this;
     }
- 
+    
+    
+    
+    
+    /**
+     * Drop a table
+     * 
+     * @param string $tableName   The name of the table which should be dropped.
+     * 
+     * @return Hoff
+     */
+     
+    function _drop($tableName)
+    {
+        $query = "DROP TABLE $tableName";
+        
+        $this->db->rawQuery($query);
+        
+        $this->lastQuery = $query;
+        
+        $this->clean();
+        
+        return $this;
+    }
+    
     
     
     

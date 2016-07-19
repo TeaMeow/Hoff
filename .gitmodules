@@ -1,0 +1,3 @@
+[submodule "library/MySQLi-Class"]
+	path = library/MySQLi-Class
+	url = git@github.com:TeaMeow/MySQLi-Class.git
