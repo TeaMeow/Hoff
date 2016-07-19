@@ -431,10 +431,10 @@ class Hoff
         /** column()->primary() */
         if(!$groupName && empty($columns))
         {
-            end($this->columns);
-            $lastColumn = &$this->columns[key($this->columns)];
-            
-            $lastColumn[$indexType] = true;
+            if($indexType !== 'index')
+                $this->setLastColumnValue($indexType, true);
+            else
+                $this->table[$indexArray][$this->getLastColumnName] = [$this->getLastColumnName];
         }
         
         /** primary(['username', 'nickname']) */
@@ -544,6 +544,22 @@ class Hoff
         return $this;
     }
     
+    
+    
+    
+    /**
+     * Get the name of the last column.
+     * 
+     * @return string   The name of the last column.
+     */
+    
+    function getLastColumnName()
+    {
+        end($this->columns);
+        $lastColumn = $this->columns[key($this->columns)];
+        
+        return $lastColumn['name'];
+    }
     
     
     
