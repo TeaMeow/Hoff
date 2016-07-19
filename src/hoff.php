@@ -434,7 +434,7 @@ class Hoff
             if($indexType !== 'index')
                 $this->setLastColumnValue($indexType, true);
             else
-                $this->table[$indexArray][$this->getLastColumnName] = [$this->getLastColumnName];
+                $this->table[$indexArray][$this->getLastColumnName()] = [$this->getLastColumnName()];
         }
         
         /** primary(['username', 'nickname']) */
