@@ -4,6 +4,7 @@ build:
 
     # mysql-server
     - printf "%s\n------------------------------\n---------  M Y S Q L ---------\n------------------------------%s\n%s\n"
+    - service mysql start
     - mysql -u root -e "create database hoff"
 
     # versions
