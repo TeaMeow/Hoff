@@ -146,6 +146,7 @@ class Hoff
                           'primaryKeys' => [],
                           'indexKeys'   => [],
                           'comment'     => null];
+        $this->insert  = [];
 
         return $this;
     }
@@ -565,6 +566,8 @@ class Hoff
     function _insert($data)
     {
         $this->insert[] = $data;
+
+        return $this;
     }
 
 
