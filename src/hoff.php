@@ -26,6 +26,14 @@ class Hoff
     public $table = [];
 
     /**
+     * Values to insert after the table was created.
+     *
+     * @var array
+     */
+
+    public $insert = [];
+
+    /**
      * The last generated query.
      *
      * @var string
@@ -481,6 +489,9 @@ class Hoff
 
         $this->db->rawQuery($query);
 
+        foreach($this->insert as $data)
+            $this->db->insert($tableName, $data);
+
         $this->lastQuery = $query;
 
         $this->clean();
@@ -539,6 +550,23 @@ class Hoff
 
         return $this;
     }
+
+
+
+
+    /**
+     * Insert the values to the table.
+     *
+     * @param array $data   The data to insert.
+     *
+     * @return Hoff
+     */
+
+    function _insert($data)
+    {
+        $this->insert[] = $data;
+    }
+
 
 
 
